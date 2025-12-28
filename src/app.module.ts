@@ -1,10 +1,16 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { Module, OnModuleInit } from '@nestjs/common';
+import { SeedModule } from './common/seed/seed.module';
+import { AdminSeedService } from './common/seed/admin.seed';
+import { ConfigModule } from '@nestjs/config';
+import { PrismaModule } from 'prisma/prisma.module';
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, SeedModule],
 })
-export class AppModule {}
+export class AppModule implements OnModuleInit {
+  constructor(private readonly adminSeed: AdminSeedService) {}
+
+  async onModuleInit() {
+    await this.adminSeed.seedAdmin();
+  }
+}
