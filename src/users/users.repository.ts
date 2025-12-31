@@ -47,18 +47,30 @@ export class UsersRepository {
    * Find user by ID
    */
   async findById(id: string) {
-    return this.prisma.user.findUnique({
+    const result = this.prisma.user.findUnique({
       where: { id },
     });
+
+    if (!result) {
+      throw new Error('User not found');
+    }
+
+    return result;
   }
 
   /**
    * Find user by email
    */
   async findByEmail(email: string) {
-    return this.prisma.user.findUnique({
+    const result = this.prisma.user.findUnique({
       where: { email },
     });
+
+    if (!result) {
+      throw new Error('User not found');
+    }
+
+    return result;
   }
 
   /**
@@ -74,6 +86,13 @@ export class UsersRepository {
    * Update user
    */
   async update(id: string, data: Prisma.UserUpdateInput) {
+  
+    const result = await this.findById(id);
+
+    if (!result) {
+      throw new Error('User not found');
+    }
+
     return this.prisma.user.update({
       where: { id },
       data,
@@ -84,6 +103,12 @@ export class UsersRepository {
    * Delete user
    */
   async delete(id: string) {
+
+    const result = await this.findById(id);
+
+    if (!result) {
+      throw new Error('User not found');
+    }
     return this.prisma.user.delete({
       where: { id },
     });

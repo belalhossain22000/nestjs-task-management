@@ -15,6 +15,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserQueryDto } from './dto/user-query.dto';
 import { ResponseMessage } from 'src/common/interceptors/response.interceptor';
+import { ParseObjectIdPipe } from 'src/common/pipes/parse-objectid.pipe';
 
 @Controller('users')
 export class UsersController {
@@ -37,24 +38,21 @@ export class UsersController {
   // ✅ Get single user
   @ResponseMessage('User retrieved successfully')
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
+  findOne(@Param('id', ParseObjectIdPipe) id: string) {
     return this.usersService.findOne(id);
   }
 
   // ✅ Update user
   @ResponseMessage('User updated successfully')
   @Patch(':id')
-  update(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() updateUserDto: UpdateUserDto,
-  ) {
+  update(@Param('id', ParseObjectIdPipe) id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(id, updateUserDto);
   }
 
   // ✅ Delete user
   @ResponseMessage('User deleted successfully')
   @Delete(':id')
-  remove(@Param('id', ParseUUIDPipe) id: string) {
+  remove(@Param('id', ParseObjectIdPipe) id: string) {
     return this.usersService.remove(id);
   }
 }
