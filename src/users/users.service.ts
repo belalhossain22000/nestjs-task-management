@@ -1,78 +1,79 @@
 import {
-  BadRequestException,
   Injectable,
   NotFoundException,
+  ConflictException,
 } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
+
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { PrismaService } from 'prisma/prisma.service';
-import * as bcrypt from 'bcrypt';
-import { ApiError } from 'src/common/errors/api-error';
+import { UsersRepository } from './users.repository';
+import { UserQueryDto } from './dto/user-query.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly usersRepository: UsersRepository,
+    private readonly configService: ConfigService,
+  ) {}
 
+  /**
+   * Create new user (BUSINESS LOGIC)
+   */
   async create(dto: CreateUserDto) {
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email: dto.email },
-    });
-
+    // ✅ business rule: email must be unique
+    const existingUser = await this.usersRepository.findByEmail(dto.email);
     if (existingUser) {
-      throw new ApiError(409, 'User already exists!');
+      throw new ConflictException('User already exists!');
     }
 
-    const hashedPassword = await bcrypt.hash(
-      dto.password,
-      Number(process.env.SALT_ROUNDS),
-    );
+    // ✅ hash password (business concern)
+    const saltRounds = this.configService.get<number>('SALT_ROUNDS', 10);
+    const hashedPassword = await bcrypt.hash(dto.password, saltRounds);
 
-    const user = await this.prisma.user.create({
-      data: {
-        name: dto.name,
-        email: dto.email,
-        password: hashedPassword,
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        createdAt: true,
-      },
-    });
-
-    return user;
-  }
-
-  findAll() {
-    return this.prisma.user.findMany({
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        createdAt: true,
-      },
+    return this.usersRepository.create({
+      name: dto.name,
+      email: dto.email,
+      password: hashedPassword,
     });
   }
 
+  /**
+   * Get users with pagination/filter/search
+   */
+  async findAll(query: UserQueryDto) {
+    return this.usersRepository.findAll(query);
+  }
+
+  /**
+   * Get single user
+   */
   async findOne(id: string) {
-    const user = await this.prisma.user.findUnique({ where: { id } });
-    if (!user) throw new NotFoundException('User not found');
+    const user = await this.usersRepository.findById(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
     return user;
   }
 
-  update(id: string, dto: UpdateUserDto) {
-    return this.prisma.user.update({
-      where: { id },
-      data: dto,
-    });
+  /**
+   * Update user
+   */
+  async update(id: string, dto: UpdateUserDto) {
+    // optional business rule: ensure user exists
+    await this.findOne(id);
+
+    return this.usersRepository.update(id, dto);
   }
 
-  remove(id: string) {
-    return this.prisma.user.delete({
-      where: { id },
-    });
+  /**
+   * Delete user
+   */
+  async remove(id: string) {
+    // optional business rule: ensure user exists
+    await this.findOne(id);
+
+    return this.usersRepository.delete(id);
   }
 }
