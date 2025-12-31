@@ -6,6 +6,7 @@ import { SignOptions } from 'jsonwebtoken';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UsersModule } from '../users/users.module';
+import { PasswordResetRepository } from './password-reset.repository';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { UsersModule } from '../users/users.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        secret: config.get<string>('JWT_SECRET')!, 
+        secret: config.get<string>('JWT_SECRET')!,
         signOptions: {
           expiresIn: config.get<string>(
             'JWT_EXPIRES_IN',
@@ -24,7 +25,7 @@ import { UsersModule } from '../users/users.module';
       }),
     }),
   ],
-  providers: [AuthService],
+  providers: [AuthService, PasswordResetRepository],
   controllers: [AuthController],
   exports: [JwtModule],
 })

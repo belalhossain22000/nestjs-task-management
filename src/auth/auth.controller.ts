@@ -5,6 +5,8 @@ import { ResponseMessage } from 'src/common/interceptors/response.interceptor';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { Roles } from './decorators/roles.decorator';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -27,9 +29,17 @@ export class AuthController {
   ) {
     return this.authService.changePassword(user.sub, dto.newPassword);
   }
+  // forgot password
+  @Post('/forgot-password')
+  @ResponseMessage('If the email exists, a reset link has been sent')
+  forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(dto.email);
+  }
 
-  // logout
-  @Post('/logout')
-  @ResponseMessage('User logged out successfully')
-  logout() {}
+  // reset password
+  @Post('/reset-password')
+  @ResponseMessage('Password reset successfully')
+  resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto.token, dto.newPassword);
+  }
 }
