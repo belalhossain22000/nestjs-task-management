@@ -22,14 +22,14 @@ export class UsersService {
    * Create new user (BUSINESS LOGIC)
    */
   async create(dto: CreateUserDto) {
-    // ✅ business rule: email must be unique
+  
     const existingUser = await this.usersRepository.findByEmail(dto.email);
     if (existingUser) {
       throw new ConflictException('User already exists!');
     }
 
-    // ✅ hash password (business concern)
-    const saltRounds = this.configService.get<number>('SALT_ROUNDS', 10);
+ 
+    const saltRounds = Number(this.configService.get('SALT_ROUNDS', 10));
     const hashedPassword = await bcrypt.hash(dto.password, saltRounds);
 
     return this.usersRepository.create({
