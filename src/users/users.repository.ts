@@ -86,7 +86,6 @@ export class UsersRepository {
    * Update user
    */
   async update(id: string, data: Prisma.UserUpdateInput) {
-  
     const result = await this.findById(id);
 
     if (!result) {
@@ -95,7 +94,9 @@ export class UsersRepository {
 
     return this.prisma.user.update({
       where: { id },
-      data,
+      data: {
+        password: data.password,
+      },
     });
   }
 
@@ -103,7 +104,6 @@ export class UsersRepository {
    * Delete user
    */
   async delete(id: string) {
-
     const result = await this.findById(id);
 
     if (!result) {

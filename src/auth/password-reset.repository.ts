@@ -1,32 +1,52 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
 
-
 @Injectable()
 export class PasswordResetRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(userId: string, token: string, expiresAt: Date) {
+  // 1️⃣ Create OTP record
+  create(userId: string, otp: string, expiresAt: Date) {
     return this.prisma.passwordResetToken.create({
-      data: { userId, token, expiresAt },
+      data: {
+        userId,
+        otp,
+        expiresAt,
+        used: false,
+      },
     });
   }
 
-  findValid(token: string) {
+  // 2️⃣ Find valid OTP for a user
+  findValidOtp(userId: string, otp: string) {
     return this.prisma.passwordResetToken.findFirst({
       where: {
-        token,
+        userId,
+        otp,
         used: false,
-        expiresAt: { gt: new Date() },
+        expiresAt: {
+          gt: new Date(),
+        },
       },
-      include: { user: true },
     });
   }
 
+  // 3️⃣ Mark OTP as used
   markUsed(id: string) {
     return this.prisma.passwordResetToken.update({
       where: { id },
       data: { used: true },
+    });
+  }
+
+  // (optional) 4️⃣ Cleanup expired OTPs
+  deleteExpired() {
+    return this.prisma.passwordResetToken.deleteMany({
+      where: {
+        expiresAt: {
+          lt: new Date(),
+        },
+      },
     });
   }
 }

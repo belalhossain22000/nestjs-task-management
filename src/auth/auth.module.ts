@@ -7,10 +7,12 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UsersModule } from '../users/users.module';
 import { PasswordResetRepository } from './password-reset.repository';
+import { MailModule } from 'src/common/mail/mail.module';
 
 @Module({
   imports: [
     UsersModule,
+    MailModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

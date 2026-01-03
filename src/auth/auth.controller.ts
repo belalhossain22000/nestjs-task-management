@@ -22,7 +22,7 @@ export class AuthController {
   }
 
   // change password
-  @Roles('ADMIN')
+ @Roles('USER', 'ADMIN')
   @Post('/change-password')
   @ResponseMessage('Password changed successfully')
   changePassword(
@@ -32,11 +32,10 @@ export class AuthController {
     return this.authService.changePassword(user.sub, dto.newPassword);
   }
 
-  
   // forgot password
   @Public()
   @Post('/forgot-password')
-  @ResponseMessage('If the email exists, a reset link has been sent')
+  @ResponseMessage('If the email exists, a reset otp has been sent')
   forgotPassword(@Body() dto: ForgotPasswordDto) {
     return this.authService.forgotPassword(dto.email);
   }
@@ -46,6 +45,6 @@ export class AuthController {
   @Post('/reset-password')
   @ResponseMessage('Password reset successfully')
   resetPassword(@Body() dto: ResetPasswordDto) {
-    return this.authService.resetPassword(dto.token, dto.newPassword);
+    return this.authService.resetPassword(dto.email, dto.otp, dto.newPassword);
   }
 }
