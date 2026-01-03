@@ -14,6 +14,7 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 import { ParseObjectIdPipe } from 'src/common/pipes/parse-objectid.pipe';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { UserQueryDto } from 'src/users/dto/user-query.dto';
+import { TaskQueryDto } from './dto/task-query.dto';
 
 @Controller('task')
 export class TaskController {
@@ -30,7 +31,7 @@ export class TaskController {
 
   // 2️⃣ Get all tasks of logged-in user
   @Get()
-  findAll(@Query() query: UserQueryDto, @CurrentUser() user: { sub: string }) {
+  findAll(@Query() query: TaskQueryDto, @CurrentUser() user: { sub: string }) {
     return this.taskService.findAll(user.sub, query);
   }
 

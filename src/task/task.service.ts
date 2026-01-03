@@ -5,6 +5,7 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 import { UserQueryDto } from 'src/users/dto/user-query.dto';
 import { PrismaQueryBuilder } from 'src/common/query-builder/prisma-query.builder';
 import { Prisma } from '@prisma/client';
+import { TaskQueryDto } from './dto/task-query.dto';
 
 @Injectable()
 export class TaskService {
@@ -22,18 +23,18 @@ export class TaskService {
   }
 
   // 2️⃣ Get all tasks of logged-in user
-  async findAll(userId: string, query: UserQueryDto) {
+  async findAll(userId: string, query: TaskQueryDto) {
     const { skip, take, metaInput } = PrismaQueryBuilder.buildPagination(query);
 
     const dynamicWhere = PrismaQueryBuilder.buildWhere<Prisma.TaskWhereInput>({
       query,
       searchableFields: ['title'],
-      filterableFields: ['status'], 
+      filterableFields: ['status'],
     });
 
     const where: Prisma.TaskWhereInput = {
       ...dynamicWhere,
-      userId, 
+      userId,
     };
 
     const [data, total] = await this.prisma.$transaction([
