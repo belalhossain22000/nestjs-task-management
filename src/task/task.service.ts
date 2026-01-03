@@ -2,6 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { UserQueryDto } from 'src/users/dto/user-query.dto';
+import { PrismaQueryBuilder } from 'src/common/query-builder/prisma-query.builder';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class TaskService {
@@ -19,11 +22,34 @@ export class TaskService {
   }
 
   // 2️⃣ Get all tasks of logged-in user
-  async findAll(userId: string) {
-    return this.prisma.task.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
+  async findAll(userId: string, query: UserQueryDto) {
+    const { skip, take, metaInput } = PrismaQueryBuilder.buildPagination(query);
+
+    const dynamicWhere = PrismaQueryBuilder.buildWhere<Prisma.TaskWhereInput>({
+      query,
+      searchableFields: ['title'],
+      filterableFields: ['status'], 
     });
+
+    const where: Prisma.TaskWhereInput = {
+      ...dynamicWhere,
+      userId, 
+    };
+
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.task.findMany({
+        where,
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.task.count({ where }),
+    ]);
+
+    return {
+      meta: PrismaQueryBuilder.buildMeta(total, metaInput),
+      data,
+    };
   }
 
   // 3️⃣ Get single task by id (owned by user)

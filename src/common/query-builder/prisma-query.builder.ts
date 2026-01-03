@@ -8,7 +8,7 @@ interface BuildQueryOptions<TWhere> {
 }
 
 export class PrismaQueryBuilder {
-  static buildWhere<TWhere extends Prisma.UserWhereInput>(
+  static buildWhere<TWhere extends Record<string, any>>(
     options: BuildQueryOptions<TWhere>,
   ): TWhere {
     const { query, searchableFields = [], filterableFields = [] } = options;

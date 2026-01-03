@@ -6,12 +6,14 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { ParseObjectIdPipe } from 'src/common/pipes/parse-objectid.pipe';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import { UserQueryDto } from 'src/users/dto/user-query.dto';
 
 @Controller('task')
 export class TaskController {
@@ -28,8 +30,8 @@ export class TaskController {
 
   // 2️⃣ Get all tasks of logged-in user
   @Get()
-  findAll(@CurrentUser() user: { sub: string }) {
-    return this.taskService.findAll(user.sub);
+  findAll(@Query() query: UserQueryDto, @CurrentUser() user: { sub: string }) {
+    return this.taskService.findAll(user.sub, query);
   }
 
   // 3️⃣ Get single task (only owner)

@@ -14,7 +14,7 @@ export class UsersRepository {
   async findAll(query: UserQueryDto) {
     const { skip, take, metaInput } = PrismaQueryBuilder.buildPagination(query);
 
-    const where = PrismaQueryBuilder.buildWhere({
+    const where = PrismaQueryBuilder.buildWhere<Prisma.UserWhereInput>({
       query,
       searchableFields: ['name', 'email'],
       filterableFields: ['role', 'name', 'email'],
