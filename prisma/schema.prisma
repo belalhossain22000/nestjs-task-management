@@ -20,9 +20,14 @@ model User {
   passwordResetTokens PasswordResetToken[]
 }
 
+enum Role {
+  ADMIN
+  USER
+}
+
 model PasswordResetToken {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  otp     String   @unique
+  otp       String   @unique
   userId    String   @db.ObjectId
   expiresAt DateTime
   used      Boolean  @default(false)
@@ -32,19 +37,17 @@ model PasswordResetToken {
 }
 
 model Task {
-  id        String  @id @default(auto()) @map("_id") @db.ObjectId
-  title     String
-  completed Boolean @default(false)
+  id     String     @id @default(auto()) @map("_id") @db.ObjectId
+  title  String
+  status TaskStatus @default(TODO)
 
   userId String @db.ObjectId
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
-}
+  updatedAt DateTime @updatedAt
 
-enum Role {
-  ADMIN
-  USER
+  @@index([userId])
 }
 
 enum TaskStatus {

@@ -15,6 +15,7 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter'
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
+import { TaskModule } from './task/task.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
     SeedModule,
     UsersModule,
     AuthModule,
+    TaskModule,
   ],
   controllers: [AppController],
   providers: [
