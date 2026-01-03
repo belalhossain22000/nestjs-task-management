@@ -8,16 +8,14 @@ import { PrismaQueryBuilder } from 'src/common/query-builder/prisma-query.builde
 export class UsersRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  /**
-   * Find users with pagination, filtering, and search
-   */
+  // 🔹 Find users with pagination, filtering, search
   async findAll(query: UserQueryDto) {
     const { skip, take, metaInput } = PrismaQueryBuilder.buildPagination(query);
 
     const where = PrismaQueryBuilder.buildWhere<Prisma.UserWhereInput>({
       query,
       searchableFields: ['name', 'email'],
-      filterableFields: ['role', 'name', 'email'],
+      filterableFields: ['role'],
     });
 
     const [data, total] = await this.prisma.$transaction([
@@ -43,72 +41,35 @@ export class UsersRepository {
     };
   }
 
-  /**
-   * Find user by ID
-   */
+  // 🔹 Find user by ID (NO THROW)
   async findById(id: string) {
-    const result = this.prisma.user.findUnique({
+    return this.prisma.user.findUnique({
       where: { id },
     });
-
-    if (!result) {
-      throw new Error('User not found');
-    }
-
-    return result;
   }
 
-  /**
-   * Find user by email
-   */
+  // 🔹 Find user by email (NO THROW)
   async findByEmail(email: string) {
-    const result = this.prisma.user.findUnique({
+    return this.prisma.user.findUnique({
       where: { email },
     });
-
-    if (!result) {
-      throw new Error('User not found');
-    }
-
-    return result;
   }
 
-  /**
-   * Create user
-   */
+  // 🔹 Create user
   async create(data: Prisma.UserCreateInput) {
-    return this.prisma.user.create({
+    return this.prisma.user.create({ data });
+  }
+
+  // 🔹 Update user (GENERIC UPDATE)
+  async update(id: string, data: Prisma.UserUpdateInput) {
+    return this.prisma.user.update({
+      where: { id },
       data,
     });
   }
 
-  /**
-   * Update user
-   */
-  async update(id: string, data: Prisma.UserUpdateInput) {
-    const result = await this.findById(id);
-
-    if (!result) {
-      throw new Error('User not found');
-    }
-
-    return this.prisma.user.update({
-      where: { id },
-      data: {
-        password: data.password,
-      },
-    });
-  }
-
-  /**
-   * Delete user
-   */
+  // 🔹 Delete user
   async delete(id: string) {
-    const result = await this.findById(id);
-
-    if (!result) {
-      throw new Error('User not found');
-    }
     return this.prisma.user.delete({
       where: { id },
     });

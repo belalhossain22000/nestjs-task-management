@@ -4,12 +4,12 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { ConfigService } from '@nestjs/config';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersRepository } from './users.repository';
 import { UserQueryDto } from './dto/user-query.dto';
-import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UsersService {
@@ -18,17 +18,14 @@ export class UsersService {
     private readonly configService: ConfigService,
   ) {}
 
-  /**
-   * Create new user (BUSINESS LOGIC)
-   */
+  // 🔹 Create user
   async create(dto: CreateUserDto) {
-  
     const existingUser = await this.usersRepository.findByEmail(dto.email);
+
     if (existingUser) {
-      throw new ConflictException('User already exists!');
+      throw new ConflictException('User already exists');
     }
 
- 
     const saltRounds = Number(this.configService.get('SALT_ROUNDS', 10));
     const hashedPassword = await bcrypt.hash(dto.password, saltRounds);
 
@@ -39,41 +36,43 @@ export class UsersService {
     });
   }
 
-  /**
-   * Get users with pagination/filter/search
-   */
+  // 🔹 Get users
   async findAll(query: UserQueryDto) {
     return this.usersRepository.findAll(query);
   }
 
-  /**
-   * Get single user
-   */
+  // 🔹 Get user by ID
   async findOne(id: string) {
     const user = await this.usersRepository.findById(id);
+
     if (!user) {
       throw new NotFoundException('User not found');
     }
+
     return user;
   }
 
-  /**
-   * Update user
-   */
+  // 🔹 Get profile
+  async getProfile(userId: string) {
+    const user = await this.usersRepository.findById(userId);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
+  }
+
+  // 🔹 Update user
   async update(id: string, dto: UpdateUserDto) {
-    // optional business rule: ensure user exists
     await this.findOne(id);
 
     return this.usersRepository.update(id, dto);
   }
 
-  /**
-   * Delete user
-   */
+  // 🔹 Delete user
   async remove(id: string) {
-    // optional business rule: ensure user exists
     await this.findOne(id);
-
     return this.usersRepository.delete(id);
   }
 }
