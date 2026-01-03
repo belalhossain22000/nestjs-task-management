@@ -28,24 +28,23 @@ import { RolesGuard } from './auth/guards/roles.guard';
   providers: [
     AppService,
     JwtAuthGuard,
-    // Global Response Interceptor (WITH Reflector support)
+
     {
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor,
     },
 
-    // Global Exception Filter
     {
       provide: APP_FILTER,
       useClass: GlobalExceptionFilter,
     },
     {
       provide: APP_GUARD,
-      useClass: JwtAuthGuard, // 1️⃣ authentication
+      useClass: JwtAuthGuard,
     },
     {
       provide: APP_GUARD,
-      useClass: RolesGuard, // 2️⃣ authorization
+      useClass: RolesGuard,
     },
   ],
 })

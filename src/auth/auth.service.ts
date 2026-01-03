@@ -55,8 +55,11 @@ export class AuthService {
 
   //change password
   async changePassword(userId: string, newPassword: string) {
+    
     const saltRounds = Number(this.configService.get('SALT_ROUNDS', 10));
+
     const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+    
     return this.usersRepository.update(userId, { password: hashedPassword });
   }
 
